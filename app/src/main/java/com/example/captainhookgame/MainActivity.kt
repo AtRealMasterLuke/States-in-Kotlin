@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -44,46 +45,78 @@ class MainActivity : ComponentActivity() {
             The mutableState can be thought of as the steering wheel
             used to update the ship's direction*/
         }
+        //Declare a new mutableStateOf variable named stormOrTreasure to hold a string value. Initialize it with an empty string
+        val stormOrTreasure = remember {
+            mutableStateOf("")
+        }
+        val health = remember {
+            mutableStateOf(5)//player starts with 5 lives
+        }
+        //flag to check if the game is over
+        val gameOver = remember {
+            mutableStateOf(false)
+        }
         Column {
             Text(text = "Treasures found: ${treasuresFound.value}")
             Text(text = "Current Direction: ${direction.value}")
-            Button(onClick = {
-                direction.value = "East" /*Change the direction upon clicking Sail East btn*/
-                /*Depending on some luck factors, we may run into a storm or treasures*/
-                if (Random.nextBoolean()) {//This is a 50/50 chance randomizer
-                    treasuresFound.value += 1
+            //Text composable to display the value of stormOrTreasure
+            Text(text = stormOrTreasure.value)
+            Text(text = "Health: ${health.value}")
+
+            // If gameOver is true, show Game Over message
+            if (gameOver.value){
+                Text(text = "Game Over! You are out of lives!")
+            }else{
+                Button(onClick = {
+                    sail("East", direction, treasuresFound, stormOrTreasure, health, gameOver)
+                }) {
+                    Text(text = "Sail East")
                 }
-            }) {
-                Text(text = "Sail East")
+                Button(onClick = {
+                    sail("West", direction, treasuresFound, stormOrTreasure, health, gameOver)
+                }) {
+                    Text(text = "Sail West")
+                }
+                Button(onClick = {
+                    sail("North", direction, treasuresFound, stormOrTreasure, health, gameOver)
+                }) {
+                    Text(text = "Sail North")
+                }
+                Button(onClick = {
+                    sail("South", direction, treasuresFound, stormOrTreasure, health, gameOver)
+                }) {
+                    Text(text = "Sail South")
+                }
             }
-            Button(onClick = {
-                direction.value = "West" /*Change the direction upon clicking Sail West btn*/
-                /*Depending on some luck factors, we may run into a storm or treasures*/
-                if (Random.nextBoolean()) {//This is a 50/50 chance randomizer
-                    treasuresFound.value += 1
-                }
-            }) {
-                Text(text = "Sail West")
-            }
-            Button(onClick = {
-                direction.value = "North"
-                if (Random.nextBoolean()) {
-                    treasuresFound.value += 1
-                }
-            }) {
-                Text(text = "Sail North")
-            }
-            Button(onClick = {
-                direction.value = "South"
-                if (Random.nextBoolean()) {
-                    treasuresFound.value += 1
-                }
-            }) {
-                Text(text = "Sail South")
+
+        }
+    }
+    /**
+     * Function to handle sailing logic.
+     */
+    private fun sail(
+        newDirection: String,
+        direction: MutableState<String>,
+        treasuresFound: MutableState<Int>,
+        stormOrTreasure: MutableState<String>,
+        health: MutableState<Int>,
+        gameOver: MutableState<Boolean>
+    ) {
+        direction.value = newDirection
+        if (Random.nextBoolean()) {
+            treasuresFound.value += 1
+            stormOrTreasure.value = "Found a Treasure!"
+        } else {
+            health.value -= 1 // Lose a life
+            stormOrTreasure.value = "Storm Ahead! Lost 1 life."
+            if (health.value <= 0) {
+                gameOver.value = true // Trigger game over
+                stormOrTreasure.value = "Storm Ahead! You lost your last life."
             }
         }
     }
 }
+
 
 
 
